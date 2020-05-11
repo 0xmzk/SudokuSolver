@@ -1,3 +1,6 @@
+import copy
+
+
 class UnsolvableSudoku(Exception):
     def __str__(self):
         return "The sudoku cannot be solved."
@@ -30,28 +33,31 @@ class Solver:
         A 1D-Array that contains 81 numbers. Every 9 numbers in the array correspond
         to a row of numbers on the sudoku board. This format is a 1D version of type=0.
         '''
-        self.sudoku = sudoku
+        self.sudoku = copy.deepcopy(sudoku)
         if autoSolve:
             self.solve()
 
-    def returnAsArray(self, force=False):
-        if self.__isSolved() or force:
+    def returnAsArray(self):
+        if self.__isValidFormat():
             return self.sudoku
         else:
-            return "Sudoku is not solved!"
+            raise InvalidSudoku
 
     def print(self):
-        s = "-" * 23 + "\n"
-        for y in range(len(self.sudoku)):
-            for x in range(len(self.sudoku[y])):
-                s += str(self.sudoku[y][x]) + " "
-                if x == 2 or x == 5:
-                    s += " | "
-                elif x == 8:
-                    s += "\n"
-            if y == 2 or y == 5 or y == 8:
-                s += "-" * 23 + "\n"
-        print(s)
+        if self.__isValidFormat():
+            s = "-" * 23 + "\n"
+            for y in range(len(self.sudoku)):
+                for x in range(len(self.sudoku[y])):
+                    s += str(self.sudoku[y][x]) + " "
+                    if x == 2 or x == 5:
+                        s += " | "
+                    elif x == 8:
+                        s += "\n"
+                if y == 2 or y == 5 or y == 8:
+                    s += "-" * 23 + "\n"
+            print(s)
+        else:
+            raise InvalidSudoku
 
     def solve(self):
         if self.__isValidFormat():

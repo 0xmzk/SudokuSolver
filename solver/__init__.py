@@ -3,6 +3,6 @@ Simple Sudoku Solver
 """
 
 __title__ = 'Sudoku Solver'
-__author__ = 'Mieszko Kaminski'
+__author__ = 'Mieszko'
 
-from . import solver
+from solver.solver import *
