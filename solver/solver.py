@@ -31,7 +31,7 @@ class Solver:
         number in the row on the sudoku board.
 
         A 1D-Array that contains 81 numbers. Every 9 numbers in the array correspond
-        to a row of numbers on the sudoku board. This format is a 1D version of type=0.
+        to a row of numbers on the sudoku board.
         '''
         self.sudoku = copy.deepcopy(sudoku)
         if autoSolve:
