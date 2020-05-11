@@ -29,7 +29,7 @@ When invoked `Solver.print()` will print out a sudoku grid.
 
 When invoked `Solver.returnAsArray()` will return the sudoku as a 2D-array.
 
-##Exceptions
+## Exceptions
 
 * If the sudoku is unsolvable a `UnsolvableSudoku` exception is thrown. 
 * If the sudoku is already solved a `SudokuSolved` exception is thrown.
