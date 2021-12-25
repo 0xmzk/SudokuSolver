@@ -25,13 +25,14 @@ s = solver.Solver(example_sudoku)
 # Prints a 'pretty' version of the solved sudoku
 s.print()
 
-
 # Example 2 (auto-solve disabled)
 # Create a Solver instance - this time the sudoku will not be solved upon instantiation
-s = solver.Solver(example_sudoku, autoSolve=False)
+s = solver.Solver(example_sudoku, auto_solve=False)
 
 # Call the solve function to solve the sudoku
 s.solve()
 
 # Returns the solved sudoku as an 2D-array (like the acceptable format type 1)
-s.returnAsArray()
+s.returnAs2DArray()
+
+

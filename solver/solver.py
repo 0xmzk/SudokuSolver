@@ -1,4 +1,6 @@
 import copy
+import numpy as np
+import numpy.typing as npt
 
 
 class UnsolvableSudoku(Exception):
@@ -17,10 +19,10 @@ class SudokuSolved(Exception):
 
 
 class Solver:
-    def __init__(self, sudoku, autoSolve=True):
-        '''
+    def __init__(self, sudoku, auto_solve=True):
+        """
         :param sudoku: The array of numbers from the sudoku puzzle.
-        :param autoSolve: Decides whether to solve straight away or wait for solve()
+        :param auto_solve: Decides whether to solve straight away or wait for solve()
         to be invoked.
 
         There are two acceptable formats for the sudoku parameter that the Solver
@@ -32,49 +34,46 @@ class Solver:
 
         A 1D-Array that contains 81 numbers. Every 9 numbers in the array correspond
         to a row of numbers on the sudoku board.
-        '''
-        self.sudoku = copy.deepcopy(sudoku)
-        if autoSolve:
+        """
+
+        self.sudoku = self.__formatSudoku(copy.deepcopy(sudoku))
+        if auto_solve:
             self.solve()
 
-    def returnAsArray(self):
-        if self.__isValidFormat():
-            return self.sudoku
-        else:
-            raise InvalidSudoku
+    def returnAs2DArray(self):
+        return self.sudoku
 
     def print(self):
-        if self.__isValidFormat():
-            s = "-" * 23 + "\n"
-            for y in range(len(self.sudoku)):
-                for x in range(len(self.sudoku[y])):
-                    s += str(self.sudoku[y][x]) + " "
-                    if x == 2 or x == 5:
-                        s += " | "
-                    elif x == 8:
-                        s += "\n"
-                if y == 2 or y == 5 or y == 8:
-                    s += "-" * 23 + "\n"
-            print(s)
-        else:
-            raise InvalidSudoku
+        s = "-" * 23 + "\n"
+        for y in range(len(self.sudoku)):
+            for x in range(len(self.sudoku[y])):
+                s += str(self.sudoku[y][x]) + " "
+                if x == 2 or x == 5:
+                    s += " | "
+                elif x == 8:
+                    s += "\n"
+            if y == 2 or y == 5 or y == 8:
+                s += "-" * 23 + "\n"
+        print(s)
 
     def solve(self):
-        if self.__isValidFormat():
-            if self.__isSolved():
-                raise SudokuSolved
-            self.__solve(self.sudoku)
-            if not self.__isSolved():
-                raise UnsolvableSudoku
-            return True
-        else:
-            raise InvalidSudoku
+        if self.__isSolved():
+            raise SudokuSolved
+        self.__solve(self.sudoku)
+        if not self.__isSolved():
+            raise UnsolvableSudoku
+        return True
 
     def __solve(self, sudoku):
+        """
+        :param sudoku:
+        :return: True, sudoku is solved; False, sudoku is not solved.
+        """
         if self.__isSolved():
             return True
         for y in range(0, 9):
             for x in range(0, 9):
+                # 0, indicated an empty space.
                 if sudoku[y][x] == 0:
                     for numberTry in range(1, 10):
                         if self.__isValid(numberTry, x, y):
@@ -97,13 +96,20 @@ class Solver:
             return 3
 
     def __isValid(self, number, x, y):
+        """
+        Function checks whether given number make the sudoku valid.
+        :param number:
+        :param x: x-position in the sudoku (2D-array column index)
+        :param y: y-position in the sudoku (2D-array row index)
+        :return:
+        """
+        # Check if given number is already present in current row.
         if number in self.sudoku[y]:
-            # does the number already exist in the current row?
             return False
 
+        # Check if given number is already present in current column.
         for row in self.sudoku:
             if number == row[x]:
-                # does the number already exist in the current column?
                 return False
 
         square_location = [self.__determineQuadrant(x) * 3, self.__determineQuadrant(y) * 3]
@@ -121,6 +127,7 @@ class Solver:
                     return False
         return True
 
+    @DeprecationWarning
     def __toMatrix(self):
         matrix = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -139,6 +146,7 @@ class Solver:
                 del self.sudoku[0]
         self.sudoku = matrix
 
+    @DeprecationWarning
     def __valueValidation(self, x):
         if type(x) != int:
             # check if value in cell is a int
@@ -172,6 +180,34 @@ class Solver:
             return False
 
         return True
+
+    @staticmethod
+    def __format1Dto2DArray(array: npt.ArrayLike) -> npt.ArrayLike:
+        return np.reshape(array, (9, 9))
+
+    def __formatSudoku(self, sudoku: list) -> npt.ArrayLike:
+        """
+        Function formats given sudoku (list) as a 2D (9x9) array that the program can work with
+        :param sudoku: one of the two acceptable format types.
+        :return:
+        """
+        formatted_sudoku = np.array(sudoku)
+        # Data type validation
+        # Check if all elements are integers
+        if not formatted_sudoku.dtype == int:
+            raise InvalidSudoku
+        # Data range validation
+        if not ((formatted_sudoku >= 0) & (formatted_sudoku <= 9)).all():
+            raise InvalidSudoku
+
+        # Case 1, format type 2 (1x81 array)
+        if len(formatted_sudoku) == 81:
+            formatted_sudoku = self.__format1Dto2DArray(sudoku)
+        # Case 2, format type 1 (9x9 array)
+        if not formatted_sudoku.shape == (9, 9):
+            raise InvalidSudoku
+
+        return formatted_sudoku
 
     def __isValidFormat(self):
         if len(self.sudoku) == 81:
