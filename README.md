@@ -25,9 +25,9 @@ The Solver class has the following methods:
 
 When invoked `Solver.solve()` will attempt to solve the sudoku given.
 
-When invoked `Solver.print()` will print out a sudoku grid.
+When invoked `Solver.print()` will pretty-print a sudoku grid.
 
-When invoked `Solver.returnAsArray()` will return the sudoku as a 2D-array.
+When invoked `Solver.returnAs2DArray()` will return the sudoku as a 2D-array.
 
 ### Exceptions
 

@@ -32,7 +32,7 @@ s = solver.Solver(example_sudoku, auto_solve=False)
 # Call the solve function to solve the sudoku
 s.solve()
 
-# Returns the solved sudoku as an 2D-array (like the acceptable format type 1)
-s.returnAs2DArray()
+# Returns the solved sudoku as an 2D-array (structure of format type 1)
+print(s.returnAs2DArray())
 
 

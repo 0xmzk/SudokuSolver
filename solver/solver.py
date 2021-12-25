@@ -1,4 +1,5 @@
 import copy
+
 import numpy as np
 import numpy.typing as npt
 
@@ -28,22 +29,26 @@ class Solver:
         There are two acceptable formats for the sudoku parameter that the Solver
         works with (see below).
 
-        A 2D-Array that contains 9 rows which each contain 9 numbers. Each row corresponds
-        to a row on the sudoku board and each number in the row corresponds to a
-        number in the row on the sudoku board.
+        A 2D-Array of 9x9 shape.
 
-        A 1D-Array that contains 81 numbers. Every 9 numbers in the array correspond
-        to a row of numbers on the sudoku board.
+        A 1D-Array of 1x81 shape.
         """
 
         self.sudoku = self.__formatSudoku(copy.deepcopy(sudoku))
         if auto_solve:
             self.solve()
 
-    def returnAs2DArray(self):
+    def returnAs2DArray(self) -> npt.ArrayLike:
+        """
+        Returns sudoku as a 9x9 array
+        :return:
+        """
         return self.sudoku
 
     def print(self):
+        """
+        Pretty prints current sudoku.
+        """
         s = "-" * 23 + "\n"
         for y in range(len(self.sudoku)):
             for x in range(len(self.sudoku[y])):
@@ -57,12 +62,12 @@ class Solver:
         print(s)
 
     def solve(self):
+        # Entry function into recursive solving algorithm
         if self.__isSolved():
             raise SudokuSolved
         self.__solve(self.sudoku)
         if not self.__isSolved():
             raise UnsolvableSudoku
-        return True
 
     def __solve(self, sudoku):
         """
@@ -75,25 +80,34 @@ class Solver:
             for x in range(0, 9):
                 # 0, indicated an empty space.
                 if sudoku[y][x] == 0:
-                    for numberTry in range(1, 10):
-                        if self.__isValid(numberTry, x, y):
-                            sudoku[y][x] = numberTry
+                    for number_try in range(1, 10):
+                        if self.__isValid(number_try, x, y):
+                            sudoku[y][x] = number_try
                             if self.__solve(sudoku):
                                 return True
                             sudoku[y][x] = 0
                     return False
 
     @staticmethod
-    def __determineQuadrant(n):
-        if 9 / (n + 1) >= 3:
-            # first third of the array
-            return 1
-        elif 9 / (n + 1) >= 1.5:
-            # second third of the array
-            return 2
-        else:
-            # last third of the array
-            return 3
+    def __determineBox(x: int, y: int) -> []:
+        """
+        Function determines the box which given x, y positions lie.
+        The function returns a 1D list.
+        :param x: x cord
+        :param y: y cord
+        :return: 1D List, x-max cord at idx 0, y-max cord at idx 1
+        """
+
+        def determinePositionInArray(n: int):
+            if n in [0, 1, 2]:
+                return 1
+            elif n in [3, 4, 5]:
+                return 2
+            elif n in [6, 7, 8]:
+                return 3
+
+        return [determinePositionInArray(x) * 3, determinePositionInArray(y) * 3]
+
 
     def __isValid(self, number, x, y):
         """
@@ -112,84 +126,43 @@ class Solver:
             if number == row[x]:
                 return False
 
-        square_location = [self.__determineQuadrant(x) * 3, self.__determineQuadrant(y) * 3]
-        for y in range(square_location[1] - 3, square_location[1]):
-            for x in range(square_location[0] - 3, square_location[0]):
-                if number == self.sudoku[y][x]:
+        # # Check if given number is present in 3x3 section (box) of sudoku
+        box_x_y = self.__determineBox(x, y)
+
+        # Iterate from y_max - 3 to y_max
+        for y1 in range(box_x_y[1] - 3, box_x_y[1]):
+            # Iterate from x_max -3 to x_max
+            for x1 in range(box_x_y[0] - 3, box_x_y[0]):
+                # Skip comparing the element to itself
+                if (y1 == y) & (x1 == x):
+                    continue
+                if number == self.sudoku[y1][x1]:
                     return False
 
         return True
 
     def __isSolved(self):
+        """
+        Checks if current sudoku is solved.
+
+        :return: True if solved, else False
+        """
         for y in range(0, 9):
             for x in range(0, 9):
                 if self.sudoku[y][x] == 0:
                     return False
         return True
 
-    @DeprecationWarning
-    def __toMatrix(self):
-        matrix = [
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-        ]
-        for y in range(9):
-            for x in range(9):
-                matrix[y][x] = self.sudoku[0]
-                del self.sudoku[0]
-        self.sudoku = matrix
-
-    @DeprecationWarning
-    def __valueValidation(self, x):
-        if type(x) != int:
-            # check if value in cell is a int
-            return False
-        elif x > 9 or x < 0:
-            # check if the value in the cell is between 0-9
-            return False
-        return True
-
-    def _isValidFormatPlacement(self, number, x, y):
-        if number == 0:
-            return True
-
-        if self.sudoku[y].count(number) > 1:
-            return False
-
-        count = 0
-        for row in self.sudoku:
-            if number == row[x]:
-                count += 1
-        if count > 1:
-            return False
-
-        count = 0
-        square_location = [self.__determineQuadrant(x) * 3, self.__determineQuadrant(y) * 3]
-        for y in range(square_location[1] - 3, square_location[1]):
-            for x in range(square_location[0] - 3, square_location[0]):
-                if number == self.sudoku[y][x]:
-                    count += 1
-        if count > 1:
-            return False
-
-        return True
-
     @staticmethod
-    def __format1Dto2DArray(array: npt.ArrayLike) -> npt.ArrayLike:
+    def format1Dto2DArray(array: npt.ArrayLike) -> npt.ArrayLike:
+        """Reshapes a 1d array into a 2d array"""
         return np.reshape(array, (9, 9))
 
     def __formatSudoku(self, sudoku: list) -> npt.ArrayLike:
         """
         Function formats given sudoku (list) as a 2D (9x9) array that the program can work with
         :param sudoku: one of the two acceptable format types.
-        :return:
+        :return: (9x9) numpy array
         """
         formatted_sudoku = np.array(sudoku)
         # Data type validation
@@ -202,31 +175,9 @@ class Solver:
 
         # Case 1, format type 2 (1x81 array)
         if len(formatted_sudoku) == 81:
-            formatted_sudoku = self.__format1Dto2DArray(sudoku)
+            formatted_sudoku = self.format1Dto2DArray(sudoku)
         # Case 2, format type 1 (9x9 array)
         if not formatted_sudoku.shape == (9, 9):
             raise InvalidSudoku
 
         return formatted_sudoku
-
-    def __isValidFormat(self):
-        if len(self.sudoku) == 81:
-            # if length is 81 then it could be a 1d array of 81 numbers
-            for number in self.sudoku:
-                if not self.__valueValidation(number):
-                    return False
-            # if the 1d array passes all the checks then convert it into a 2d array
-            self.__toMatrix()
-        elif len(self.sudoku) == 9:
-            # if length is 9 then it could be a 2d array of 9 rows containing 9 numbers each
-            # check if it is a valid matrix
-            for y in range(9):
-                for x in range(9):
-                    if not self.__valueValidation(self.sudoku[y][x]):
-                        return False
-                    if not self._isValidFormatPlacement(self.sudoku[y][x], x, y):
-                        # check if the numbers already present abide by the rules
-                        return False
-        else:
-            return False
-        return True
