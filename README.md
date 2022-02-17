@@ -5,8 +5,8 @@ A Sudoku solver module written in Python.
 ## Acceptable sudoku formats
 The acceptable formats are as follows:
 
-* A 2D-Array that contains 9 rows which each contain 9 numbers. Where each row corresponds to a row on the sudoku board and each number in the row corresponds to a number in the row on the sudoku board.
-* A 1D-Array that contains 81 numbers. Where every 9 numbers in the array correspond to a row of numbers on the sudoku board.
+* A 9x9 2D-Array: 9 rows which each contain 9 numbers; each row corresponds to a row on the sudoku board.
+* A 1x81 1D-Array: 1 row which contains 91 numbers; every 9 numbers in the array correspond to a row of numbers on the sudoku board.
 ## Usage
 ### Demo
 ```python
@@ -25,9 +25,9 @@ The Solver class has the following methods:
 
 When invoked `Solver.solve()` will attempt to solve the sudoku given.
 
-When invoked `Solver.print()` will pretty-print a sudoku grid.
+When invoked `Solver.print()` will print out a sudoku grid.
 
-When invoked `Solver.returnAs2DArray()` will return the sudoku as a 2D-array.
+When invoked `Solver.returnAsArray()` will return the sudoku as a 2D-array.
 
 ### Exceptions
 
